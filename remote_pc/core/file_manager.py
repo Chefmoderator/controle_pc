@@ -5,129 +5,97 @@ import zipfile
 
 class FileManager:
 
-        @staticmethod
-        def searching_file():
-            filename = input("Enter your file name > ").strip()
+    @staticmethod
+    def searching_file(filename: str):
+        filename = filename.strip()
+        for root, dirs, files in os.walk("C:\\"):
+            if filename in files:
+                path = os.path.join(root, filename)
+                return {"found": True, "path": path}
+        return {"found": False, "error": "File not found"}
 
-            path = None
-            for root, dirs, files in os.walk("C:\\"):
-                if filename in files:
-                    path = os.path.join(root, filename)
-                    break
+    @staticmethod
+    def inspection_of_folders(path: str):
+        path = path.strip()
+        try:
+            items = os.listdir(path)
+            return {"path": path, "items": items}
+        except FileNotFoundError:
+            return {"error": "Path not found"}
+        except PermissionError:
+            return {"error": "No permission to access this folder"}
+        except Exception as e:
+            return {"error": str(e)}
 
-            if path:
-                print(f"Your file is found at: {path}")
+    @staticmethod
+    def create_folder(path: str):
+        try:
+            os.makedirs(path, exist_ok=True)
+            return {"created": True, "path": path}
+        except Exception as e:
+            return {"created": False, "error": str(e)}
+
+    @staticmethod
+    def create_file(path: str, content: str = ""):
+        try:
+            with open(path, "w") as f:
+                f.write(content)
+            return {"created": True, "path": path}
+        except Exception as e:
+            return {"created": False, "error": str(e)}
+
+    @staticmethod
+    def delete_item(path: str):
+        try:
+            if os.path.isfile(path):
+                os.remove(path)
+                return {"deleted": True, "type": "file"}
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+                return {"deleted": True, "type": "folder"}
             else:
-                print("File not found.")
+                return {"deleted": False, "error": "File or folder does not exist"}
+        except Exception as e:
+            return {"deleted": False, "error": str(e)}
 
-        @staticmethod
-        def inspection_of_folders():
-            path = input("Enter path > ").strip()
+    @staticmethod
+    def move_item(src: str, dst: str):
+        try:
+            shutil.move(src, dst)
+            return {"moved": True, "from": src, "to": dst}
+        except Exception as e:
+            return {"moved": False, "error": str(e)}
 
-            try:
-                items = os.listdir(path)
-                print("\nItems in folder:")
-                for i in items:
-                    print(" -", i)
-            except FileNotFoundError:
-                print("Path not found.")
-            except PermissionError:
-                print("No permission to access this folder.")
-            except Exception as e:
-                print("Error:", e)
-
-        @staticmethod
-        def create_folder():
-            path = input("Enter new folder path > ").strip()
-            try:
-                os.makedirs(path, exist_ok=True)
-                print("Folder created.")
-            except Exception as e:
-                print("Error:", e)
-
-        @staticmethod
-        def create_file():
-            path = input("Enter new file path > ").strip()
-            try:
-                with open(path, "w") as f:
-                    content = input("Enter content (leave empty for blank file): ")
-                    f.write(content)
-                print("File created.")
-            except Exception as e:
-                print("Error:", e)
-
-        @staticmethod
-        def delete_item():
-            path = input("Enter file/folder path to delete > ").strip()
-            try:
-                if os.path.isfile(path):
-                    os.remove(path)
-                    print("File deleted.")
-                elif os.path.isdir(path):
-                    shutil.rmtree(path)
-                    print("Folder deleted.")
+    @staticmethod
+    def create_zip(source: str, zip_path: str):
+        try:
+            with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+                if os.path.isfile(source):
+                    zipf.write(source, os.path.basename(source))
                 else:
-                    print("File or folder does not exist.")
-            except Exception as e:
-                print("Error:", e)
+                    for root, dirs, files in os.walk(source):
+                        for file in files:
+                            full_path = os.path.join(root, file)
+                            rel_path = os.path.relpath(full_path, source)
+                            zipf.write(full_path, rel_path)
 
-        @staticmethod
-        def move_item():
-            src = input("Enter source path > ").strip()
-            dst = input("Enter destination path > ").strip()
+            return {"archived": True, "zip_path": zip_path}
+        except Exception as e:
+            return {"archived": False, "error": str(e)}
 
-            try:
-                shutil.move(src, dst)
-                print("Moved successfully.")
-            except Exception as e:
-                print("Error:", e)
+    @staticmethod
+    def read_file(path: str):
+        try:
+            with open(path, "r") as f:
+                return {"path": path, "content": f.read()}
+        except Exception as e:
+            return {"error": str(e)}
 
-        @staticmethod
-        def create_zip():
-            source = input("Enter file/folder to archive > ").strip()
-            zip_path = input("Enter output zip path > ").strip()
-
-            try:
-                with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-                    if os.path.isfile(source):
-                        zipf.write(source, os.path.basename(source))
-                    else:
-                        for root, dirs, files in os.walk(source):
-                            for file in files:
-                                full_path = os.path.join(root, file)
-                                rel_path = os.path.relpath(full_path, source)
-                                zipf.write(full_path, rel_path)
-
-                print("Zip created.")
-            except Exception as e:
-                print("Error:", e)
-
-        @staticmethod
-        def read_file():
-            path = input("Enter file path > ").strip()
-            try:
-                with open(path, "r") as f:
-                    print("\nFile content:\n")
-                    print(f.read())
-            except Exception as e:
-                print("Error:", e)
-
-        @staticmethod
-        def edit_file():
-            path = input("Enter file path > ").strip()
-
-            try:
-                print("Current content:\n")
-                with open(path, "r") as f:
-                    print(f.read())
-
-                new_text = input("\nEnter new content (rewrite entire file):\n")
-                with open(path, "w") as f:
-                    f.write(new_text)
-
-                print("File updated.")
-            except Exception as e:
-                print("Error:", e)
-
-
-
+    @staticmethod
+    def edit_file(path: str, new_text: str):
+        try:
+            with open(path, "w") as f:
+                f.write(new_text)
+            return {"updated": True, "path": path}
+        except Exception as e:
+            return {"updated": False, "error": str(e)}
