@@ -1,0 +1,13 @@
+os
+zipfile
+shutil
+screen_brightness_control
+comtypes
+pycaw
+datetime
+psutil
+getpass
+platform
+subprocess
+fastapi
+uvicorn
