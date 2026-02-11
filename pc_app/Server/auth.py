@@ -1,7 +1,7 @@
 import os
 import uuid
 
-AUTH_FILE= "auth.key"
+AUTH_FILE= "12142143252"
 
 def generate_key():
     if not os.path.exists(AUTH_FILE):

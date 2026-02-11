@@ -1,9 +1,19 @@
 from fastapi import FastAPI, Header, HTTPException
-from auth import check_key, generate_key
+from Server.auth import check_key, generate_key
 
-from pc_app.core import InfoManager,PowerManagement, LaunchProgram,RemoteVolume,ScreenBrightnessControl
-from pc_app.core import ProcessManager
-from pc_app.core.file_manager import FileManager
+from core.system_control import InfoManager, PowerManagement, LaunchProgram, RemoteVolume, ScreenBrightnessControl
+from core .processes import ProcessManager
+from core.file_manager import FileManager
+from pydantic import BaseModel
+
+class CreateFileBody(BaseModel):
+    content: str
+
+class EditBody(BaseModel):
+    new_text: str
+
+class ZipBody(BaseModel):
+    zip_path: str
 
 app = FastAPI()
 
@@ -13,162 +23,145 @@ def auth_key(key: str):
     if key is None or not check_key(key):
         raise HTTPException(status_code=401, detail="Invalid API key")
 
+
 @app.get("/info/system")
 def system_info(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return InfoManager.info_manager_json()
+    return {"status": "ok", "data": InfoManager.info_manager_json()}
 
-#power
+
+# POWER
 @app.get("/power/shutdown")
 def shutdown_pc(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    PowerManagement.shutdown()
-    return {"status": "ok"}
+    return {"status": "ok", "data": PowerManagement.shutdown()}
 
 @app.get("/power/restart")
 def restart_pc(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    PowerManagement.restart()
-    return {"status": "ok"}
+    return {"status": "ok", "data": PowerManagement.restart()}
 
 @app.get("/power/sleep")
 def sleep_pc(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    PowerManagement.sleep()
-    return {"status": "ok"}
+    return {"status": "ok", "data": PowerManagement.sleep()}
 
 @app.get("/power/hibernate")
 def hibernate_pc(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    PowerManagement.hibernate()
-    return {"status": "ok"}
+    return {"status": "ok", "data": PowerManagement.hibernate()}
 
-#Volume
+
+# VOLUME
 @app.get("/volume/mute")
 def volume_mute(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    RemoteVolume.mute()
-    return {"status": "ok"}
+    return {"status": "ok", "data": RemoteVolume.mute()}
 
 @app.get("/volume/unmute")
 def volume_unmute(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    RemoteVolume.unmute()
-    return {"status": "ok"}
+    return {"status": "ok", "data": RemoteVolume.unmute()}
 
-@app.get("/volume/set/{value}")
+@app.get("/volume/setVolume/{value}")
 def volume_set(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    RemoteVolume.set_volume(value)
-    return {"status": "ok"}
+    return {"status": "ok", "data": RemoteVolume.set_volume(value)}
 
-@app.get("/volume/get")
+@app.get("/volume/getVolume")
 def volume_get(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return {"volume": RemoteVolume.get_volume()}
+    return {"status": "ok", "data": RemoteVolume.get_volume()}
 
-#brightness
-@app.get("/brightness/get")
-def mute(x_api_key: str = Header(default=None)):
+
+# BRIGHTNESS
+@app.get("/brightness/getBrightness")
+def brightness_get(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return {"brightness": ScreenBrightnessControl.get_brightness()}
+    return {"status": "ok", "data": ScreenBrightnessControl.get_brightness()}
 
-@app.get("/brightness/set/{value}")
-def mute(value:int ,x_api_key: str = Header(default=None)):
+@app.get("/brightness/setBrightness/{value}")
+def brightness_set(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    ScreenBrightnessControl.set_brightness(value)
-    return {"status": "ok"}
+    return {"status": "ok", "data": ScreenBrightnessControl.set_brightness(value)}
 
-#program
+
+# PROGRAM
 @app.get("/program/launch/{value}")
 def launch_program(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    LaunchProgram.launch_program(value)
-    return {"status":"ok"}
+    return {"status": "ok", "data": LaunchProgram.launch_program(value)}
 
-#process
+
+# PROCESS
 @app.get("/process/list")
-def list(x_api_key: str = Header(default=None)):
+def list_processes(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return ProcessManager.list_processes()
+    return {"status": "ok", "data": ProcessManager.list_processes()}
 
-@app.get("/process/search/{value}")
-def search(value: str, x_api_key: str = Header(default=None)):
+@app.get("/process/searchProcess/{value}")
+def search_process(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return ProcessManager.search_process(value)
+    return {"status": "ok", "data": ProcessManager.search_process(value)}
 
 @app.get("/process/kill/{value}")
-def kill(value:int, x_api_key: str = Header(default=None)):
+def kill_process(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    ProcessManager.kill_process(value)
-    return {"status":"ok"}
+    return {"status": "ok", "data": ProcessManager.kill_process(value)}
 
 @app.get("/process/start/{value}")
-def start(value:str, x_api_key: str = Header(default=None)):
+def start_process(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    ProcessManager.start_process(value)
-    return {"status":"ok"}
+    return {"status": "ok", "data": ProcessManager.start_process(value)}
 
-@app.get("/process/restart/{value}")
-def restartPR(value:int, x_api_key: str = Header(default=None)):
+@app.get("/process/restartProcess/{value}")
+def restart_process(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    ProcessManager.restart_process(value)
-    return {"status":"ok"}
+    return {"status": "ok", "data": ProcessManager.restart_process(value)}
 
 @app.get("/process/info/{value}")
-def infoPr(value:int, x_api_key: str = Header(default=None)):
+def info_process(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return ProcessManager.process_info(value)
+    return {"status": "ok", "data": ProcessManager.process_info(value)}
 
-#File
-@app.get("/file/search/{value}")
-def searchF(value: str, x_api_key: str = Header(default=None)):
+
+# FILE
+@app.get("/file/searchfile/{value}")
+def file_search(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.searching_file(value)
-
+    return {"status": "ok", "data": FileManager.searching_file(value)}
 
 @app.get("/file/inspection/{path}")
-def inspection(path: str, x_api_key: str = Header(default=None)):
+def file_inspection(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.inspection_of_folders(path)
-
+    return {"status": "ok", "data": FileManager.inspection_of_folders(path)}
 
 @app.post("/file/create/folder/{path}")
-def createfo(path: str, x_api_key: str = Header(default=None)):
+def create_folder(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.create_folder(path)
-
+    return {"status": "ok", "data": FileManager.create_folder(path)}
 
 @app.post("/file/create/file/{path}")
-def createfl(path: str, body: CreateFileBody, x_api_key: str = Header(default=None)):
+def create_file(path: str, body: CreateFileBody, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.create_file(path, body.content)
-
+    return {"status": "ok", "data": FileManager.create_file(path, body.content)}
 
 @app.post("/file/create/zip/{source}")
-def createz(source: str, body: ZipBody, x_api_key: str = Header(default=None)):
+def create_zip(source: str, body: ZipBody, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.create_zip(source, body.zip_path)
-
+    return {"status": "ok", "data": FileManager.create_zip(source, body.zip_path)}
 
 @app.delete("/file/delete/{path}")
-def delete(path: str, x_api_key: str = Header(default=None)):
+def delete_file(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.delete_item(path)
-
+    return {"status": "ok", "data": FileManager.delete_item(path)}
 
 @app.get("/file/read/{path}")
-def read(path: str, x_api_key: str = Header(default=None)):
+def read_file(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.read_file(path)
-
+    return {"status": "ok", "data": FileManager.read_file(path)}
 
 @app.put("/file/edit/{path}")
-def edit(path: str, body: EditBody, x_api_key: str = Header(default=None)):
+def edit_file(path: str, body: EditBody, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return FileManager.edit_file(path, body.new_text)
-
-
-
-
-
+    return {"status": "ok", "data": FileManager.edit_file(path, body.new_text)}
