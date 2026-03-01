@@ -4,6 +4,8 @@ from routing.pc_routes import router as pc_router
 from routing.client_routes import router as client_router
 from routing.ws_manager import handle_pc_connection
 from routing.ws_users import handle_user_connection
+from routing.registration import router as reg_router
+from storage.connect import create_db_and_tables
 import ssl
 import uvicorn
 
@@ -19,6 +21,7 @@ logger.add(
 
 app.include_router(pc_router)
 app.include_router(client_router)
+app.include_router(reg_router)
 
 @app.websocket("/ws/pc/{pc_id}")
 async def pc_ws(ws: WebSocket, pc_id: str, token: str):
@@ -33,14 +36,8 @@ async def user_ws(ws: WebSocket, pc_id: str, token: str):
 if __name__ == "__main__":
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(certfile="cert.pem", keyfile="key.pem")
+    create_db_and_tables()
 
     logger.info("Starting server on https://0.0.0.0:8443")
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8443,
-        ssl_certfile="cert.pem",
-        ssl_keyfile="key.pem",
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8443, log_level="info")
 

@@ -9,7 +9,6 @@ async def handle_user_connection(pc_id: str, token: str, websocket: WebSocket):
 
     try:
         while True:
-            # Можно читать сообщения от клиента, если нужны команды через WS
             msg = await websocket.receive_text()
             logger.info(f"[USER MESSAGE] {msg}")
     except Exception as e:
