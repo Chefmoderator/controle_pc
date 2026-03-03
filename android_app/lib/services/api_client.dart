@@ -47,8 +47,8 @@ class ApiClient {
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "pc_id": pcId,
-        "token": token,
         "command": command,
+        "token": token,
       }),
     );
 

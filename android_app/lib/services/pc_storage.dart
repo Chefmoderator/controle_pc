@@ -37,4 +37,9 @@ class PCStorage {
     await savePCs(list);
     ApiClient.removePc(pcId);
   }
+
+  static Future<PC?> get(String pcId) async {
+    final list = await loadPCs();
+    return list.firstWhere((pc) => pc.pcId == pcId);
+  }
 }
