@@ -19,10 +19,14 @@ app = FastAPI()
 
 SERVER_KEY = generate_key()
 
+
 def auth_key(key: str):
     if key is None or not check_key(key):
         raise HTTPException(status_code=401, detail="Invalid API key")
 
+@app.get("/get_api_key")
+def get_api_key():
+    return {"pc_key": SERVER_KEY}
 
 @app.get("/info/system")
 def system_info(x_api_key: str = Header(default=None)):
