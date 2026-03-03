@@ -19,16 +19,27 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/send_command")
-async def send_command(pc_id: str, command: str, token: str):
-    token_data = verify_token(token)
-    if token_data is None or token_data["pc_id"] != pc_id:
-        raise HTTPException(403, "Unauthorized")
+class CommandData(BaseModel):
+    pc_id: str
+    command: str
+    token: str
 
-    url = await execute_command(pc_id, command)
+@router.post("/send_command")
+async def send_command(data: CommandData):
+    pc_id = data.pc_id
+    command = data.command
+    token = data.token
+    command = command.lower()
+
+    token_data = verify_token(token)
+
+    if token_data is None or token_data["pc_id"] != int(pc_id):
+        raise HTTPException(403, "Unauthorized")
+    url = await execute_command(pc_id,command)
+    print("url: ", url)
     if url is None:
         raise HTTPException(404, "Unknown command")
-
+    print(3)
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
@@ -37,6 +48,7 @@ async def send_command(pc_id: str, command: str, token: str):
         raise HTTPException(503, f"PC offline: {e}")
 
     return {"status": "ok", "data": data["data"]}
+
 
 @router.post("/remove_pc")
 def remove_pc(data: RemovePCData, db: Session = Depends(get_db)):

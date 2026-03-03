@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-
+import httpx
 from storage.model import User, Clients
 from storage.connect import SessionLocal
 from auth.token_manager import create_token
@@ -21,9 +21,13 @@ def get_db():
 
 
 @router.post("/client/register_pc")
-def register_pc(data: PCData, request: Request, db: Session = Depends(get_db)):
+async def register_pc(data: PCData, request: Request, db: Session = Depends(get_db)):
     pc_ip = data.pc_ip
     user_ip = request.client.host
+
+    async with httpx.AsyncClient() as client:
+        r = await client.get(f"http://{pc_ip}:8000/get_api_key")
+        pc_key = r.json().get("pc_key")
 
     print(f"Received registration from user_ip={user_ip}, pc_ip={pc_ip}")
 
@@ -40,12 +44,12 @@ def register_pc(data: PCData, request: Request, db: Session = Depends(get_db)):
         raise HTTPException(400, "PC already linked to another user")
 
     if not pc:
-        pc = Clients(pc_ip=pc_ip, owner=user)
+        pc = Clients(pc_ip=pc_ip, owner=user, pc_key=pc_key)
         db.add(pc)
         db.commit()
         db.refresh(pc)
 
-    token = create_token(user.user_id)
+    token = create_token(user.user_id,pc.pc_id)
     user.jwt = token
     db.commit()
 

@@ -3,9 +3,10 @@ from datetime import datetime, timedelta
 
 SECRET = "Locked"
 
-def create_token(user_id: int):
+def create_token(user_id: int, pc_id: int):
     payload = {
         "user_id": user_id,
+        "pc_id": pc_id,
         "iat": datetime.utcnow(),
         "exp": datetime.utcnow() + timedelta(hours=12)
     }

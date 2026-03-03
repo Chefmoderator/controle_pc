@@ -1,9 +1,9 @@
 import httpx
-from storage.sheme import get_pc_ip
+from storage.sheme import get_pc_ip,get_pc_key
 from storage.connect import SessionLocal
 
 
-def pc_command_executor(pc_id, command,arg=None):
+def pc_command_executor(command,arg=None):
     cmd_map = {
         "info": [
             {"system": None}
@@ -58,25 +58,27 @@ def pc_command_executor(pc_id, command,arg=None):
 
     return None
 
-def get_pc_ip(pc_id):
+
+async def execute_command(pc_id, command_str: str):
+    parts = command_str.split(" ", 1)
+    command = parts[0]
+    arg = parts[1] if len(parts) > 1 else None
+    url_path = pc_command_executor(command, arg)
+
+    if url_path is None:
+        return {"error": "Unknown command"}
+
     db = SessionLocal()
-    ip = get_pc_ip(db, pc_id)
+    pc_ip = get_pc_ip(db, pc_id)
+    x_api_key = get_pc_key(db, pc_id)
     db.close()
 
-    return ip
-
-async def execute_command(pc_id: str, command: str):
-    command , arg = command.split(" ",1)
-    url_path = execute_command(pc_id,command,arg)
-    if url_path is None:
-        return {"error":"Unknown command"}
-
-    pc_ip= get_pc_ip(pc_id)
     url = f"http://{pc_ip}:8000{url_path}"
 
     try:
         async with httpx.AsyncClient() as client:
-            r = await client.get(url)
+            r = await client.get(url, headers={"x-api-key": x_api_key})
+            print("Read:", r)
             return r.json()
     except httpx.RequestError as e:
         return {"error": f"Failed to connect to PC {pc_id}: {e}"}
