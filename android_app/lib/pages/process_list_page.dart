@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import '../model/pc_model.dart';
 import './PowerManagerPage.dart';
-import './ProcessesManagerPage.dart';
+import './VolumeManagerPage.dart';
+import './SystemInfoPage.dart';
+import './ScreenBrightnessPage.dart';
+import './LaunchProgramPage.dart';
+import './FileManager.dart';
+import './ProcessManagerPage.dart';
 
 final List<String> commands = [
   "System info",
@@ -38,8 +43,24 @@ class _ProcessListPageState extends State<ProcessListPage> {
       case "Power manager":
         page = PowerManagerPage(pc: pc);
         break;
+      case "Volume manager":
+        page = VolumeManagerPage(pc: pc);
+        break;
+      case "System info":
+        page = SystemInfoPage(pc: pc);
+        break;
+      case "Brightness manager":
+        page = BrightnessManagerPage(pc: pc);
+        break;
+      case "Launch program":
+        page = ProgramManagerPage(pc: pc);
+        break;
+      case "File manager":
+        page = FileManagerPage(pc: pc);
+        break;
       case "Process manager":
-        page = Processesmanager(pc: pc);
+        page = ProcessManagerPage(pc: pc);
+        break;
     }
 
     Navigator.push(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_client.dart';
 import '../model/pc_model.dart';
-import '../services/api_client.dart';
 
 final List<String> commands = [
   "Shutdown",

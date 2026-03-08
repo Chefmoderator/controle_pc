@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import '../services/api_client.dart';
 import './HomePage.dart';
 import '../model/pc_model.dart';
