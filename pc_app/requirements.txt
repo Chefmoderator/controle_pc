@@ -11,3 +11,4 @@ platform
 subprocess
 fastapi
 uvicorn
+requests

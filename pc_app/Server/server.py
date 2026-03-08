@@ -28,7 +28,8 @@ def auth_key(key: str):
 def get_api_key():
     return {"pc_key": SERVER_KEY}
 
-@app.get("/info/system")
+
+@app.get("/info/systeminfo")
 def system_info(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": InfoManager.info_manager_json()}
@@ -67,24 +68,24 @@ def volume_unmute(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": RemoteVolume.unmute()}
 
-@app.get("/volume/setVolume/{value}")
+@app.get("/volume/setvolume/{value}")
 def volume_set(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": RemoteVolume.set_volume(value)}
 
-@app.get("/volume/getVolume")
+@app.get("/volume/getvolume")
 def volume_get(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": RemoteVolume.get_volume()}
 
 
 # BRIGHTNESS
-@app.get("/brightness/getBrightness")
+@app.get("/brightness/getbrightness")
 def brightness_get(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ScreenBrightnessControl.get_brightness()}
 
-@app.get("/brightness/setBrightness/{value}")
+@app.get("/brightness/setbrightness/{value}")
 def brightness_set(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ScreenBrightnessControl.set_brightness(value)}
@@ -94,36 +95,54 @@ def brightness_set(value: int, x_api_key: str = Header(default=None)):
 @app.get("/program/launch/{value}")
 def launch_program(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return {"status": "ok", "data": LaunchProgram.launch_program(value)}
+    return {
+        "status": "ok",
+        "data": LaunchProgram.launch_program(value)
+    }
 
+@app.get("/program/listrunning")
+def list_running_program(x_api_key: str = Header(default=None)):
+    auth_key(x_api_key)
+    return {
+        "status": "ok",
+        "data": LaunchProgram.list_running_programs()
+    }
+
+@app.get("/program/close")
+def close_program(pid:int, x_api_key: str = Header(default=None)):
+    auth_key(x_api_key)
+    return {
+        "status": "ok",
+        "data": LaunchProgram.close_program(pid)
+    }
 
 # PROCESS
-@app.get("/process/list")
+@app.get("/process/listprocesses")
 def list_processes(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ProcessManager.list_processes()}
 
-@app.get("/process/searchProcess/{value}")
+@app.get("/process/searchprocess/{value}")
 def search_process(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ProcessManager.search_process(value)}
 
-@app.get("/process/kill/{value}")
+@app.get("/process/killprocess/{value}")
 def kill_process(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ProcessManager.kill_process(value)}
 
-@app.get("/process/start/{value}")
+@app.get("/process/startprocess/{value}")
 def start_process(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ProcessManager.start_process(value)}
 
-@app.get("/process/restartProcess/{value}")
+@app.get("/process/restartprocess/{value}")
 def restart_process(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ProcessManager.restart_process(value)}
 
-@app.get("/process/info/{value}")
+@app.get("/process/infoprocess/{value}")
 def info_process(value: int, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": ProcessManager.process_info(value)}

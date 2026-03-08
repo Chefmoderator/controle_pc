@@ -1,18 +1,30 @@
 import os
 import shutil
 import zipfile
-
+import subprocess
+import shlex
 
 class FileManager:
 
     @staticmethod
-    def searching_file(filename: str):
+    def searching_file(filename: str, path="C:\\Users"):
+
         filename = filename.strip()
-        for root, dirs, files in os.walk("C:\\"):
-            if filename in files:
-                path = os.path.join(root, filename)
-                return {"found": True, "path": path}
-        return {"found": False, "error": "File not found"}
+        try:
+            cmd = f'where /r "{path}" {filename}'
+            result = subprocess.run(
+                shlex.split(cmd),
+                capture_output=True,
+                text=True,
+                shell=True
+            )
+            output = result.stdout.strip()
+            if result.returncode != 0 or not output:
+                return {"found": False, "error": "File not found"}
+            paths = output.split("\n")
+            return {"found": True, "results": paths}
+        except Exception as e:
+            return {"found": False, "error": str(e)}
 
     @staticmethod
     def inspection_of_folders(path: str):

@@ -6,6 +6,7 @@ import psutil
 import datetime
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL
+import pythoncom
 import screen_brightness_control as sbc
 
 class InfoManager:
@@ -78,9 +79,6 @@ class InfoManager:
         boot = datetime.datetime.fromtimestamp(psutil.boot_time())
         diff = datetime.datetime.now() - boot
 
-        print("\n=== UPTIME ===")
-        print(f"Boot time: {boot}")
-        print(f"Uptime: {diff.days} days, {diff.seconds // 3600} hours\n")
         return {
             "boot_time":boot,
             "uptime": f"{diff.days} days, {diff.seconds // 3600} hours"
@@ -160,58 +158,151 @@ class LaunchProgram:
 
     @staticmethod
     def find_file(start_path, filename):
-
         for root, dirs, files in os.walk(start_path):
-            if filename in files:
+            if filename.lower() in [f.lower() for f in files]:
                 return os.path.join(root, filename)
         return None
 
+
     @staticmethod
     def launch_program(exe_name: str):
+
         exe_name = exe_name.strip()
+
+        if exe_name.startswith("http://") or exe_name.startswith("https://"):
+            try:
+                webbrowser.open(exe_name)
+                return {
+                    "status": "success",
+                    "type": "url",
+                    "message": f"Opened URL {exe_name}"
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
         if not exe_name.lower().endswith(".exe") and "\\" not in exe_name:
             exe_name += ".exe"
 
         if "\\" in exe_name and os.path.isfile(exe_name):
             path = exe_name
+
         else:
-            path = LaunchProgram.find_file("C:\\", exe_name)
+
+            search_paths = [
+                "C:\\Program Files",
+                "C:\\Program Files (x86)",
+                "C:\\Windows",
+                "C:\\"
+            ]
+            path = None
+
+            for p in search_paths:
+                path = LaunchProgram.find_file(p, exe_name)
+                if path:
+                    break
 
         if path:
             try:
-                subprocess.Popen(path)
-                return {"status": "success", "path": path, "message": f"{exe_name} launched"}
+                process = subprocess.Popen(path)
+
+                return {
+                    "status": "success",
+                    "type": "program",
+                    "path": path,
+                    "pid": process.pid,
+                    "message": f"{exe_name} launched"
+                }
             except Exception as e:
-                return {"status": "error", "path": path, "message": str(e)}
-        else:
-            return {"status": "error", "message": "Program not found"}
+                return {
+                    "status": "error",
+                    "path": path,
+                    "message": str(e)
+                }
+
+        return {"status": "error", "message": "Program not found"}
+
+
+    @staticmethod
+    def list_running_programs():
+        programs = []
+
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                programs.append({
+                    "pid": proc.info['pid'],
+                    "name": proc.info['name']
+                })
+            except:
+                pass
+
+        return {"programs": programs}
+
+
+    @staticmethod
+    def close_program(pid: int):
+
+        try:
+            proc = psutil.Process(pid)
+            name = proc.name()
+            proc.terminate()
+
+            return {
+                "status": "success",
+                "pid": pid,
+                "name": name,
+                "message": "Program closed"
+            }
+
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": str(e)
+            }
 
 
 class RemoteVolume:
-    device = AudioUtilities.GetSpeakers()
-    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-    volume = interface.QueryInterface(IAudioEndpointVolume)
+
+    @staticmethod
+    def _get_volume():
+        pythoncom.CoInitialize()
+
+        device = AudioUtilities.GetSpeakers()
+        interface = device.Activate(
+            IAudioEndpointVolume._iid_,
+            CLSCTX_ALL,
+            None
+        )
+
+        return interface.QueryInterface(IAudioEndpointVolume)
 
     @staticmethod
     def mute():
-        RemoteVolume.volume.SetMute(True, None)
+        volume = RemoteVolume._get_volume()
+        volume.SetMute(True, None)
         return {"volume_status": "muted"}
 
     @staticmethod
     def unmute():
-        RemoteVolume.volume.SetMute(False, None)
+        volume = RemoteVolume._get_volume()
+        volume.SetMute(False, None)
         return {"volume_status": "unmuted"}
 
     @staticmethod
     def set_volume(new_volume: int):
         if not 0 <= new_volume <= 100:
             return {"error": "Volume must be between 0 and 100"}
-        RemoteVolume.volume.SetMasterVolumeLevelScalar(new_volume / 100, None)
+
+        volume = RemoteVolume._get_volume()
+        volume.SetMasterVolumeLevelScalar(new_volume / 100, None)
+
         return {"volume_status": f"set to {new_volume}%"}
 
     @staticmethod
     def get_volume():
-        current_volume = RemoteVolume.volume.GetMasterVolumeLevelScalar()
+        print("1")
+        volume = RemoteVolume._get_volume()
+        current_volume = volume.GetMasterVolumeLevelScalar()
+
         return {"current_volume": int(current_volume * 100)}
 
 
