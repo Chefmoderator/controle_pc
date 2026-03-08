@@ -4,3 +4,4 @@ python-jose
 websockets
 pydantic
 loguru
+requests

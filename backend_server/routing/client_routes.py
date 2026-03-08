@@ -35,19 +35,13 @@ async def send_command(data: CommandData):
 
     if token_data is None or token_data["pc_id"] != int(pc_id):
         raise HTTPException(403, "Unauthorized")
-    url = await execute_command(pc_id,command)
-    print("url: ", url)
-    if url is None:
-        raise HTTPException(404, "Unknown command")
-    print(3)
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            data = response.json()
-    except Exception as e:
-        raise HTTPException(503, f"PC offline: {e}")
+    print(1)
+    result = await execute_command(pc_id,command)
+    print("Resulte: ", result)
+    if "error" in result:
+        raise HTTPException(503, result["error"])
 
-    return {"status": "ok", "data": data["data"]}
+    return {"status": "ok", "data": result.get("data")}
 
 
 @router.post("/remove_pc")

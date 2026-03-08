@@ -6,7 +6,7 @@ from storage.connect import SessionLocal
 def pc_command_executor(command,arg=None):
     cmd_map = {
         "info": [
-            {"system": None}
+            {"systeminfo": None}
         ],
         "power": [
             {"shutdown": None,
@@ -17,23 +17,25 @@ def pc_command_executor(command,arg=None):
         "volume": [
             {"mute": None,
              "unmute": None,
-             "setVolume": "smth",
-             "getVolume": None}
+             "setvolume": "smth",
+             "getvolume": None}
         ],
         "brightness": [
-            {"getBrightness": None,
-             "setBrightness": "smth"}
+            {"getbrightness": None,
+             "setbrightness": "smth"}
         ],
         "program": [
-            {"launch": None}
+            {"launch": "smth",
+             "listrunning":None,
+             "close":"smth"}
         ],
         "process": [
-            {"list": None,
-             "searchProcess": "smth",
-             "kill": "smth",
-             "start": "smth",
-             "restartProcess": "smth",
-             "info": "smth"}
+            {"listprocesses": None,
+             "searchprocess": "smth",
+             "killprocess": "smth",
+             "startprocess": "smth",
+             "restartprocess": "smth",
+             "infoprocess": "smth"}
         ],
         "file": [
             {"searchfile": "smth",
@@ -54,17 +56,29 @@ def pc_command_executor(command,arg=None):
                 url = f"/{group}/{command}"
             elif commands_dict[command] == "smth":
                 url = f"/{group}/{command}/{arg}"
-            return url
+
+            return url;
 
     return None
 
 
 async def execute_command(pc_id, command_str: str):
-    parts = command_str.split(" ", 1)
-    command = parts[0]
-    arg = parts[1] if len(parts) > 1 else None
+    parts = command_str.split(" ", 2)
+    print("Part 1: ", parts[0])
+    print("Parts 2: ", parts[1])
+    print("Parts 3: ", parts[2])
+    if len(parts) == 1:
+        command = parts[0]
+        arg = None
+    elif len(parts) == 2:
+        command = f"{parts[0]}{parts[1]}"
+        arg = None
+    else:
+        command = f"{parts[0]}{parts[1]}"
+        arg = parts[2]
+    print("Command: ",command)
     url_path = pc_command_executor(command, arg)
-
+    print("Url path: ",url_path)
     if url_path is None:
         return {"error": "Unknown command"}
 
@@ -74,9 +88,10 @@ async def execute_command(pc_id, command_str: str):
     db.close()
 
     url = f"http://{pc_ip}:8000{url_path}"
-
     try:
-        async with httpx.AsyncClient() as client:
+        timeout = httpx.Timeout(300.0, connect=10.0)
+
+        async with httpx.AsyncClient(timeout=timeout) as client:
             r = await client.get(url, headers={"x-api-key": x_api_key})
             print("Read:", r)
             return r.json()
