@@ -26,9 +26,9 @@ class Server:
         create_db_and_tables()
         self.logger.info(f"Starting server on https://{self.ip}:{self.port}")
 
-        threading.Thread(target=self._run_uvicorn, daemon=True).start()
+        threading.Thread(target=self.runUvicorn, daemon=True).start()
 
-    def _run_uvicorn(self):
+    def runUvicorn(self):
         uvicorn.run(
             self.app,
             host=self.ip,

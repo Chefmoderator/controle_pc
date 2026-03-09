@@ -21,7 +21,7 @@ class TkinterUI:
         ).pack(pady=(20, 15))
 
 
-        self.ip_entry = self.create_input("API / IP")
+        self.ip_entry = self.create_input("IP")
         self.port_entry = self.create_input("Port")
 
 
