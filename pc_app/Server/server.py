@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Header, HTTPException
 from Server.auth import check_key, generate_key
-
+from fastapi import  Body
 from core.system_control import InfoManager, PowerManagement, LaunchProgram, RemoteVolume, ScreenBrightnessControl
-from core .processes import ProcessManager
+from core.processes import ProcessManager
 from core.file_manager import FileManager
+from core.camera_manager import CameraManager
 from pydantic import BaseModel
 
 class CreateFileBody(BaseModel):
@@ -154,37 +155,55 @@ def file_search(value: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": FileManager.searching_file(value)}
 
-@app.get("/file/inspection/{path}")
+@app.get("/file/inspectfolder/{path:path}")
 def file_inspection(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": FileManager.inspection_of_folders(path)}
 
-@app.post("/file/create/folder/{path}")
+@app.get("/file/createfolder/{path}")
 def create_folder(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": FileManager.create_folder(path)}
 
-@app.post("/file/create/file/{path}")
-def create_file(path: str, body: CreateFileBody, x_api_key: str = Header(default=None)):
+@app.get("/file/createfile/{full_path}")
+def create_file(full_path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return {"status": "ok", "data": FileManager.create_file(path, body.content)}
+    result = FileManager.create_file(full_path)
+    return {"status": "ok", "data": result}
 
-@app.post("/file/create/zip/{source}")
+@app.get("/file/createzip/{source}")
 def create_zip(source: str, body: ZipBody, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": FileManager.create_zip(source, body.zip_path)}
 
-@app.delete("/file/delete/{path}")
+@app.get("/file/deleteitem/{path}")
 def delete_file(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": FileManager.delete_item(path)}
 
-@app.get("/file/read/{path}")
+@app.get("/file/readfile/{path}")
 def read_file(path: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": FileManager.read_file(path)}
 
-@app.put("/file/edit/{path}")
+@app.get("/file/moveitem/{src}/{dst}")
+def move_item(src: str,dst: str, x_api_key: str = Header(default=None)):
+    auth_key(x_api_key)
+    return {"status":"ok", "data": FileManager.move_item(src, dst)}
+
+@app.get("/file/editfile/{path}")
 def edit_file(path: str, body: EditBody, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status": "ok", "data": FileManager.edit_file(path, body.new_text)}
+
+#camera
+@app.get("/camera/screenscreenshot")
+def get_screen(x_api_key: str = Header(default=None)):
+    auth_key(x_api_key)
+    return {"status":"ok", "data":CameraManager.get_screen()}
+
+@app.get("/camera/cameracapture")
+def get_camera(x_api_key: str = Header(default=None)):
+    auth_key(x_api_key)
+    return {"status":"ok", "data":CameraManager.get_camera()}
+

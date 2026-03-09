@@ -12,3 +12,5 @@ subprocess
 fastapi
 uvicorn
 requests
+mss pillow
+opencv-python

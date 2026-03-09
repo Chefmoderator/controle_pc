@@ -48,10 +48,11 @@ class FileManager:
             return {"created": False, "error": str(e)}
 
     @staticmethod
-    def create_file(path: str, content: str = ""):
+    def create_file(path: str):
         try:
-            with open(path, "w") as f:
-                f.write(content)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w"):
+                pass
             return {"created": True, "path": path}
         except Exception as e:
             return {"created": False, "error": str(e)}
