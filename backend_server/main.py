@@ -1,6 +1,5 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI
 from loguru import logger
-from routing.pc_routes import router as pc_router
 from routing.client_routes import router as client_router
 from routing.registration import router as reg_router
 from storage.connect import create_db_and_tables
@@ -25,7 +24,7 @@ logger.add(
     enqueue=True
 )
 
-app.include_router(pc_router)
+
 app.include_router(client_router)
 app.include_router(reg_router)
 

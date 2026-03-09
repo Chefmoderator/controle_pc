@@ -3,7 +3,7 @@ from storage.sheme import get_pc_ip,get_pc_key
 from storage.connect import SessionLocal
 
 
-def pc_command_executor(command,arg=None):
+def pc_command_executor(command,arg1=None,arg2=None):
     cmd_map = {
         "info": [
             {"systeminfo": None}
@@ -39,45 +39,57 @@ def pc_command_executor(command,arg=None):
         ],
         "file": [
             {"searchfile": "smth",
-             "inspection": "smth",
-             "create/folder": "smth",
-             "create/file": "smth",
-             "create/zip": "smth",
-             "delete": "smth",
-             "read": "smth",
-             "edit": "smth"}
+             "inspectfolder": "smth",
+             "createfolder": "smth",
+             "createfile":"smth",
+             "createzip": ["smth","smth2"],
+             "deleteitem": "smth",
+             "readfile": "smth",
+             "moveitem":["smth","smth"],
+             "editfile": ["smth","smth2"]}
+        ],
+        "camera": [
+            {
+                "screenscreenshot":None,
+                "cameracapture":None
+            }
         ]
     }
 
-    for group,command_list in cmd_map.items():
+    for group, command_list in cmd_map.items():
         commands_dict = command_list[0]
         if command in commands_dict:
-            if commands_dict[command] is None:
-                url = f"/{group}/{command}"
-            elif commands_dict[command] == "smth":
-                url = f"/{group}/{command}/{arg}"
-
-            return url;
+            command_type = commands_dict[command]
+            if command_type is None:
+                return f"/{group}/{command}"
+            if command_type == "smth":
+                if arg1 is None:
+                    return None
+                return f"/{group}/{command}/{arg1}"
+            if isinstance(command_type, list):
+                if arg1 is None or arg2 is None:
+                    return None
+                return f"/{group}/{command}/{arg1}/{arg2}"
 
     return None
 
 
 async def execute_command(pc_id, command_str: str):
-    parts = command_str.split(" ", 2)
-    print("Part 1: ", parts[0])
-    print("Parts 2: ", parts[1])
-    print("Parts 3: ", parts[2])
+    parts = command_str.split(" ", 3)
     if len(parts) == 1:
         command = parts[0]
-        arg = None
+        arg1, arg2 = None, None
     elif len(parts) == 2:
         command = f"{parts[0]}{parts[1]}"
-        arg = None
+        arg1, arg2 = None, None
     else:
         command = f"{parts[0]}{parts[1]}"
-        arg = parts[2]
+        arg1,arg2 = parts[2],None
+        if len(parts) > 3:
+            arg2 = parts[3]
+
     print("Command: ",command)
-    url_path = pc_command_executor(command, arg)
+    url_path = pc_command_executor(command, arg1, arg2)
     print("Url path: ",url_path)
     if url_path is None:
         return {"error": "Unknown command"}
