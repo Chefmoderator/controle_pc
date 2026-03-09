@@ -1,10 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import './serverСonfig.dart';
 
 class ApiClient {
-  static const String baseUrl = "http://192.168.0.136:8443";
+  
+  static Future<String> getServerUrl() async {
+    return await ServerConfig.loadServer();
+  }
 
   static Future<Map<String, dynamic>> registerPC(String ip) async {
+    final baseUrl = await getServerUrl();
     final url = Uri.parse("$baseUrl/client/register_pc");
 
     final response = await http.post(
@@ -21,6 +26,7 @@ class ApiClient {
   }
 
   static Future<Map<String, dynamic>> removePc(String id) async {
+    final baseUrl = await getServerUrl();
     final url = Uri.parse("$baseUrl/client/remove_pc");
     final response = await http.post(
       url,
@@ -40,6 +46,7 @@ class ApiClient {
     required String token,
     required String command,
   }) async {
+    final baseUrl = await getServerUrl();
     final url = Uri.parse("$baseUrl/client/send_command");
 
     final response = await http.post(
