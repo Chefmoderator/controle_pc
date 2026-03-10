@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+python-jose
+websockets
+pydantic
+loguru
