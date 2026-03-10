@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import ui.StartServer
 import re
+import threading
 
 class TkinterUI:
     def __init__(self):
@@ -80,4 +81,5 @@ class TkinterUI:
         full_url = f"{ip}:{port}"
         messagebox.showinfo("Server Start", f"Server started at:\n{full_url}")
 
-        ui.StartServer.Server(ip, port)
+        threading.Thread(target=lambda: ui.StartServer.Server(ip, port)).start()
+        self.root.destroy()

@@ -11,7 +11,7 @@ class CreateFileBody(BaseModel):
     content: str
 
 class EditBody(BaseModel):
-    new_text: str
+    content: str
 
 class ZipBody(BaseModel):
     zip_path: str
@@ -191,10 +191,11 @@ def move_item(src: str,dst: str, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status":"ok", "data": FileManager.move_item(src, dst)}
 
-@app.get("/file/editfile/{path}")
-def edit_file(path: str, body: EditBody, x_api_key: str = Header(default=None)):
+@app.post("/file/editfile/{path}")
+async def edit_file(path: str, content: EditBody, x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
-    return {"status": "ok", "data": FileManager.edit_file(path, body.new_text)}
+    print("Path: ",path)
+    return {"status": "ok", "data": FileManager.edit_file(path, content.content)}
 
 #camera
 @app.get("/camera/screenscreenshot")

@@ -1,5 +1,6 @@
 import uvicorn
 
+
 class Server:
     def __init__(self, ip,port):
         self.port = port
