@@ -1,11 +1,17 @@
 from fastapi import FastAPI, Header, HTTPException
+from starlette.websockets import WebSocket,WebSocketDisconnect
+import json
 from Server.auth import check_key, generate_key
-from fastapi import  Body
+from fastapi import Body
+from pydantic import BaseModel
+
+
 from core.system_control import InfoManager, PowerManagement, LaunchProgram, RemoteVolume, ScreenBrightnessControl
 from core.processes import ProcessManager
 from core.file_manager import FileManager
 from core.camera_manager import CameraManager
-from pydantic import BaseModel
+from core.stream import Stream
+
 
 class CreateFileBody(BaseModel):
     content: str
@@ -208,3 +214,24 @@ def get_camera(x_api_key: str = Header(default=None)):
     auth_key(x_api_key)
     return {"status":"ok", "data":CameraManager.get_camera()}
 
+#stream
+@app.websocket("/stream/start")
+async def stream(ws: WebSocket):
+    await ws.accept()
+    x_api_key = ws.query_params.get("x_api_key")
+
+    try:
+        auth_key(x_api_key)
+    except HTTPException:
+        print("Auth failed")
+        await ws.close(code=4401)
+        return
+
+    try:
+        while True:
+            frame_b64 = Stream.get_screen()
+            await ws.send_text(json.dumps({"status": "ok", "data": frame_b64}))
+    except WebSocketDisconnect:
+        print("Client disconnected")
+    except Exception as e:
+        print("Stream closed:", e)

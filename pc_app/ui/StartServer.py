@@ -1,4 +1,5 @@
 import uvicorn
+from Server.server import app
 
 
 class Server:
@@ -6,6 +7,5 @@ class Server:
         self.port = port
         self.ip = ip
         self.runUvicorn()
-
     def runUvicorn(self):
-        uvicorn.run("Server.server:app", host=self.ip, port=self.port)
+        uvicorn.run(app, host=self.ip, port=self.port,ws="websockets")
