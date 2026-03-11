@@ -9,9 +9,9 @@ def check_replay(msg: str) -> bool:
         if nonce in _seen_nonces:
             return False
         _seen_nonces.add(nonce)
-        # Очистка старых nonces
         if len(_seen_nonces) > 10000:
             _seen_nonces.pop()
         return True
     except:
         return False
+
