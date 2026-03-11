@@ -16,9 +16,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<PC> pcs = [];
 
-  String systemServer = "http://192.168.0.136:8443";
+  String systemServer = "192.168.0.136:8443";
   String? userServer;
-  String currentServer = "http://192.168.0.136:8443";
+  String currentServer = "192.168.0.136:8443";
 
 
 

@@ -5,7 +5,7 @@ class ServerConfig {
 
   static Future<String> loadServer() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(serverKey) ?? "http://192.168.0.136:8443";
+    return prefs.getString(serverKey) ?? "192.168.0.136:8443";
   }
 
   static Future<void> saveServer(String url) async {

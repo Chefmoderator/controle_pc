@@ -12,9 +12,10 @@ class RegisterPCPage extends StatefulWidget {
 }
 
 class _RegisterPCPageState extends State<RegisterPCPage> {
-  final IpAddressPC = TextEditingController();
+  final ipController = TextEditingController();
+  final portController = TextEditingController();
 
-  void returnTomainMenu() {
+  void returnToMainMenu() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => HomePage()),
@@ -27,21 +28,43 @@ class _RegisterPCPageState extends State<RegisterPCPage> {
       appBar: AppBar(
         title: const Text("Register PC"),
         centerTitle: true,
-        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
-              controller: IpAddressPC,
-              decoration: const InputDecoration(labelText: "PC Ip address"),
+              controller: ipController,
+              decoration: const InputDecoration(
+                labelText: "PC IP Address",
+                hintText: "Enter PC IP",
+              ),
+              keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            TextField(
+              controller: portController,
+              decoration: const InputDecoration(
+                labelText: "PC Port",
+                hintText: "Enter PC port",
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
-                final ip = IpAddressPC.text;
+                final ip = ipController.text.trim();
+                final port = portController.text.trim();
+
+                if (ip.isEmpty || port.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please enter both IP and Port")),
+                  );
+                  return;
+                }
+
                 try {
-                  final response = await ApiClient.registerPC(ip);
+                  final response = await ApiClient.registerPC(ip, port);
 
                   final existingPCs = await PCStorage.loadPCs();
 
@@ -50,17 +73,25 @@ class _RegisterPCPageState extends State<RegisterPCPage> {
                       continue;
                     }
                     final pc = PC(
-                      name: "My Pc ",
+                      name: "My PC",
                       pcId: pcData['pc_id'].toString(),
-                      token: response["jwt"]);
+                      token: response["jwt"],
+                    );
                     await PCStorage.addPC(pc);
                   }
-                  returnTomainMenu();
+
+                  returnToMainMenu();
                 } catch (e) {
-                  print("Ошибка при регистрации ПК: $e");
+                  print("Error registering PC: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Error registering PC: $e")),
+                  );
                 }
               },
-              child: const Text("send"),
+              child: const Text("Register"),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
             ),
           ],
         ),

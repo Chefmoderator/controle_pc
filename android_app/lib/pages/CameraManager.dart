@@ -14,10 +14,10 @@ class CameraPage extends StatefulWidget {
   const CameraPage({super.key, required this.pc});
 
   @override
-  State<CameraPage> createState() => _CameraPageState();
+  State<CameraPage> createState() => _CameraPage();
 }
 
-class _CameraPageState extends State<CameraPage> {
+class _CameraPage extends State<CameraPage> {
 
   String? imageBase64;
 

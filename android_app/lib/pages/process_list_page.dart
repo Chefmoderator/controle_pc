@@ -8,6 +8,7 @@ import './LaunchProgramPage.dart';
 import './FileManager.dart';
 import './ProcessManagerPage.dart';
 import './CameraManager.dart';
+import './Stream.dart';
 
 final List<String> commands = [
   "System info",
@@ -18,6 +19,7 @@ final List<String> commands = [
   "Process manager",
   "File manager",
   "Camera manager",
+  "Stream"
 ];
 
 class ProcessListPage extends StatefulWidget {
@@ -65,6 +67,9 @@ class _ProcessListPageState extends State<ProcessListPage> {
         break;
       case "Camera manager":
         page = CameraPage(pc: pc);
+        break;
+      case "Stream":
+        page = StreamPage(pc: pc);
         break;
     }
 
