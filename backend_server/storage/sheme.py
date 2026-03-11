@@ -42,3 +42,9 @@ def get_pc_key(db: Session,pc_id:int):
     if pc:
         return pc.pc_key
     return None
+
+def get_pc_port(db:Session, pc_id:int):
+    pc = db.query(Clients).filter(Clients.pc_id == pc_id).first()
+    if pc:
+        return pc.pc_port
+    return None

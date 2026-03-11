@@ -1,7 +1,10 @@
+import os
 import tkinter as tk
 from tkinter import messagebox
 import Server
 import re
+import threading
+from sertificate import createCertificate
 
 class TkinterUI:
     def __init__(self):
@@ -9,8 +12,7 @@ class TkinterUI:
         self.root.title("Server Config")
         self.root.geometry("400x250")
         self.root.resizable(False, False)
-        self.root.configure(bg="#1e1e2f")  # тёмный фон
-
+        self.root.configure(bg="#1e1e2f")
 
         tk.Label(
             self.root,
@@ -39,8 +41,8 @@ class TkinterUI:
         self.start_button.pack(pady=20, ipadx=10, ipady=5)
         self.start_button.bind("<Enter>", lambda e: self.start_button.config(bg="#45a049"))
         self.start_button.bind("<Leave>", lambda e: self.start_button.config(bg="#4caf50"))
-
         self.root.mainloop()
+
 
     def create_input(self, placeholder):
         frame = tk.Frame(self.root, bg="#1e1e2f")
@@ -78,6 +80,11 @@ class TkinterUI:
 
         port = int(port)
         full_url = f"{ip}:{port}"
+
+        if not (os.path.exists("cert.pem") and os.path.exists("key.pem")):
+            createCertificate(ip)
+
         messagebox.showinfo("Server Start", f"Server started at:\n{full_url}")
 
-        Server.Server(ip, port)
+        threading.Thread(target=lambda: Server.Server(ip,port)).start()
+        self.root.destroy()

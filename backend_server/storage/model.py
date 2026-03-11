@@ -19,6 +19,7 @@ class Clients(Base):
 
     pc_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     pc_ip: Mapped[str] = mapped_column(String(45), unique=True)
+    pc_port: Mapped[str] = mapped_column(String(4), unique=True)
     pc_key: Mapped[str] = mapped_column(String(255), nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
     owner: Mapped["User"] = relationship("User", back_populates="pcs")
