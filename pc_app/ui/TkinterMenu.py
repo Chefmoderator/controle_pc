@@ -83,3 +83,4 @@ class TkinterUI:
 
         threading.Thread(target=lambda: ui.StartServer.Server(ip, port)).start()
         self.root.destroy()
+
