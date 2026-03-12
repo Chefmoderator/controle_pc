@@ -14,4 +14,3 @@ def check_replay(msg: str) -> bool:
         return True
     except:
         return False
-

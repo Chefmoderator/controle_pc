@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import messagebox
-import Server
+from Server import Server
 import re
 import threading
 from sertificate import createCertificate
@@ -86,5 +86,5 @@ class TkinterUI:
 
         messagebox.showinfo("Server Start", f"Server started at:\n{full_url}")
 
-        threading.Thread(target=lambda: Server.Server(ip,port)).start()
+        threading.Thread(target=lambda: Server(ip, port)).start()
         self.root.destroy()
