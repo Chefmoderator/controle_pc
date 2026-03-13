@@ -95,13 +95,12 @@ async def execute_command(pc_id, command_str: str, content: str = None):
         arg1, arg2 = parts[2], None
         if len(parts) > 3:
             arg2 = parts[3]
-
     url_path = pc_command_executor(command, arg1, arg2)
-    print("command: ", command)
-    print("Arg1: ",arg1)
-    print("Arg2: ",arg2)
-    print("URL: ",url_path)
-    print("Conetnt: ", content)
+    print("command:", command)
+    print("Arg1:", arg1)
+    print("Arg2:", arg2)
+    print("URL:", url_path)
+    print("Content:", content)
     if url_path is None:
         return {"error": "Unknown command"}
     db = SessionLocal()
@@ -111,13 +110,34 @@ async def execute_command(pc_id, command_str: str, content: str = None):
     db.close()
     url = f"http://{pc_ip}:{pc_port}{url_path}"
     timeout = httpx.Timeout(300.0, connect=10.0)
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        if command == "editfile":
-            r = await client.post(url, headers={"x-api-key": x_api_key}, json={"content": content})
-        else:
-            r = await client.get(url, headers={"x-api-key": x_api_key})
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
 
-    return r.json()
+            if command == "editfile":
+                r = await client.post(
+                    url,
+                    headers={"x-api-key": x_api_key},
+                    json={"content": content}
+                )
+            else:
+                r = await client.get(
+                    url,
+                    headers={"x-api-key": x_api_key}
+                )
+            return r.json()
+
+    except httpx.ConnectError:
+        return {"online": False}
+
+    except httpx.ConnectTimeout:
+        return {"online": False}
+
+    except httpx.ReadTimeout:
+        return {"online": False}
+
+    except Exception as e:
+        print("Unexpected error:", e)
+        return {"online": False}
 
 async def WS_execute_command(pc_id, command_str: str, content: str = None):
     parts = command_str.split(" ", 3)
