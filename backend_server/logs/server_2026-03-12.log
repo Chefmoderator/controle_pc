@@ -1,6 +1,0 @@
-2026-03-12 22:03:14.422 | INFO     | Server:__init__:26 - Starting server on https://127.0.0.1:8443
-2026-03-12 22:06:51.597 | INFO     | Server:__init__:39 - Starting server at http://127.0.0.1:8443
-2026-03-12 22:07:58.442 | INFO     | Server:__init__:39 - Starting server at http://127.0.0.1:8443
-2026-03-12 22:14:47.429 | INFO     | Server:__init__:63 - Starting server at http://127.0.0.1:8443
-2026-03-12 22:17:45.085 | INFO     | Server:__init__:78 - Starting server at http://127.0.0.1:8443
-2026-03-12 22:24:41.125 | INFO     | Server:__init__:75 - Starting server at http://192.168.0.136:8443
