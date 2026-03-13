@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'styles/AppTheme.dart';
 import 'pages/HomePage.dart';
 
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
